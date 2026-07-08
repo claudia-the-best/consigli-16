@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generatore di consigli per genitori di sedicenni</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: #f5f0eb;
+            color: #2c2416;
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            background: #ffffff;
+            border-radius: 24px;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+            max-width: 700px;
+            width: 100%;
+            padding: 2rem 1.8rem;
+            transition: all 0.2s;
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #4a3e35;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .subtitle {
+            color: #7b6e60;
+            margin-bottom: 1.8rem;
+            font-size: 1rem;
+            border-left: 4px solid #c9b8a8;
+            padding-left: 1rem;
+        }
+
+        label {
+            font-weight: 600;
+            display: block;
+            margin-bottom: 0.4rem;
+            color: #4a3e35;
+        }
+
+        select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #d6cec3;
+            border-radius: 12px;
+            font-size: 1rem;
+            background: #fdfaf7;
+            color: #2c2416;
+            appearance: none;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%234a3e35" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>');
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 1.2rem;
+            cursor: pointer;
+            margin-bottom: 1.2rem;
+        }
+
+        .btn-generate {
+            background: #b5835c;
+            border: none;
+            color: white;
+            font-weight: 600;
+            font-size: 1.1rem;
+            padding: 0.9rem 2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.2s;
+            letter-spacing: 0.02em;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+        }
+
+        .btn-generate:hover {
+            background: #9c6e48;
+        }
+
+        .btn-generate:active {
+            transform: scale(0.98);
+        }
+
+        .card {
+            background: #fdfaf7;
+            border-radius: 20px;
+            padding: 1.6rem;
+            border: 1px solid #e7ddd1;
+            margin-top: 0.8rem;
+            display: none;
+            animation: fadeSlide 0.3s ease;
+        }
+
+        .card.visible {
+            display: block;
+        }
+
+        @keyframes fadeSlide {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card .tema-badge {
+            display: inline-block;
+            background: #e7ddd1;
+            color: #5e4c3a;
+            border-radius: 20px;
+            padding: 0.25rem 1rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-bottom: 0.8rem;
+        }
+
+        .card h3 {
+            font-size: 1.4rem;
+            margin-bottom: 0.6rem;
+            color: #4a3e35;
+        }
+
+        .card .consiglio {
+            font-size: 1.05rem;
+            background: #fffbf7;
+            padding: 1rem 1.2rem;
+            border-radius: 16px;
+            border: 1px solid #e2d6c9;
+            margin-bottom: 1.2rem;
+            font-style: italic;
+            line-height: 1.7;
+        }
+
+        .riferimento {
+            background: #f7f3ed;
+            padding: 1rem 1.2rem;
+            border-radius: 14px;
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+
+        .riferimento .esperto {
+            font-weight: 700;
+            color: #3f3326;
+        }
+
+        .riferimento .opera {
+            font-weight: 500;
+            color: #6b5e4f;
+        }
+
+        .riferimento .concetto {
+            color: #4a3e35;
+            margin-top: 0.4rem;
+            border-left: 3px solid #c9b8a8;
+            padding-left: 0.8rem;
+        }
+
+        .confidenza {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-top: 0.2rem;
+        }
+
+        .confidenza.alto {
+            color: #2d6a4f;
+        }
+        .confidenza.medio {
+            color: #b68b40;
+        }
+        .confidenza.basso {
+            color: #b34a4a;
+        }
+
+        .btn-verify {
+            background: transparent;
+            border: 1.5px solid #b5835c;
+            color: #b5835c;
+            font-weight: 600;
+            padding: 0.6rem 1.4rem;
+            border-radius: 40px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .btn-verify:hover {
+            background: #b5835c;
+            color: white;
+        }
+
+        .counter-panel {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 1.5rem;
+            background: #f7f3ed;
+            padding: 0.8rem 1.2rem;
+            border-radius: 16px;
+            color: #4a3e35;
+            font-weight: 500;
+        }
+
+        .counter-number {
+            background: #b5835c;
+            color: white;
+            border-radius: 30px;
+            padding: 0.25rem 0.9rem;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        footer {
+            margin-top: 2rem;
+            color: #8f8172;
+            font-size: 0.85rem;
+            text-align: center;
+        }
+
+        @media (max-width: 500px) {
+            .container {
+                padding: 1.5rem 1.2rem;
+            }
+            h1 {
+                font-size: 1.6rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧠 Genitori di sedicenni</h1>
+        <div class="subtitle">Consigli pratici basati sulla psicologia dello sviluppo, calibrati sui 16 anni</div>
+
+        <label for="temaSelect">Scegli un tema:</label>
+        <select id="temaSelect">
+            <option value="">-- Seleziona --</option>
+            <option value="Autonomia e regole">Autonomia e regole</option>
+            <option value="Comunicazione">Comunicazione</option>
+            <option value="Conflitti su orari/uscite">Conflitti su orari/uscite</option>
+            <option value="Uso di smartphone e social">Uso di smartphone e social</option>
+            <option value="Relazioni sentimentali">Relazioni sentimentali</option>
+            <option value="Motivazione scolastica">Motivazione scolastica</option>
+            <option value="Gestione delle emozioni">Gestione delle emozioni</option>
+            <option value="Gruppo dei pari">Gruppo dei pari</option>
+        </select>
+
+        <button class="btn-generate" id="generateBtn">✨ Genera consiglio</button>
+
+        <div id="cardContainer" class="card">
+            <span class="tema-badge" id="cardTema"></span>
+            <h3 id="cardTitolo"></h3>
+            <div class="consiglio" id="cardConsiglio"></div>
+            <div class="riferimento">
+                <span class="esperto" id="refEsperto"></span>
+                <span class="opera" id="refOpera"></span>
+                <div class="concetto" id="refConcetto"></div>
+                <span class="confidenza" id="refConfidenza"></span>
+            </div>
+            <button class="btn-verify" id="verifyBtn">🔍 Verifica questo riferimento</button>
+        </div>
+
+        <div class="counter-panel">
+            📋 Schede generate in questa sessione: <span class="counter-number" id="sessionCounter">0</span>
+        </div>
+    </div>
+    <footer>
+        Corso di alfabetizzazione all'IA — Esercizio didattico: verifica sempre le fonti.
+    </footer>
+
+    <script>
+        (function() {
+            // Database delle schede (5 per tema, totale 40)
+            const schedeDB = [
+                // AUTONOMIA E REGOLE (5)
+                {
+                    tema: "Autonomia e regole",
+                    consiglio: "Coinvolgi tuo figlio nella stesura delle regole familiari, chiedendo la sua opinione su orari e impegni. Spiega il 'perché' di ogni limite collegandolo allo sviluppo cerebrale tipico dei 16 anni, dove la ricerca di autonomia è forte ma il controllo degli impulsi è ancora in maturazione.",
+                    esperto: "Laurence Steinberg",
+                    opera: "Age of Opportunity (2014)",
+                    concetto: "Steinberg sottolinea che l'adolescenza è un periodo di straordinaria plasticità cerebrale: i ragazzi hanno bisogno di esplorare i propri limiti in un ambiente sicuro, con adulti che fungono da rete di protezione piuttosto che da controllori rigidi.",
+                    confidenza: "Alto"
+                },
+                {
+                    tema: "Autonomia e regole",
+                    consiglio: "Distinguete insieme le regole non negoziabili (legate alla sicurezza) da quelle modificabili (come l'ordine della camera o lo stile di abbigliamento). A 16 anni i ragazzi sviluppano un pensiero astratto sofisticato e possono argomentare; accogli il confronto come palestra di negoziazione.",
+                    esperto: "Lisa Damour",
+                    opera: "Untangled (2016)",
+                    concetto: "Damour evidenzia che le adolescenti attraversano sette transizioni evolutive e che differenziare tra 'limiti di sicurezza' e 'preferenze genitoriali' aiuta a ridurre i conflitti, rendendo i ragazzi più disposti a collaborare.",
+                    confidenza: "Alto"
+                },
+                {
+                    tema: "Autonomia e regole",
+                    consiglio: "Usa il dialogo riflessivo: quando vostro figlio chiede più libertà, esplorate insieme le possibili conseguenze delle scelte. Questo sfrutta la capacità di ragionamento ipotetico-deduttivo tipica dello stadio delle operazioni formali, raggiunto verso i 16 anni.",
+                    esperto: "Daniel Siegel",
+                    opera: "Brainstorm (2013)",
+                    concetto: "Siegel descrive il cervello adolescente come un'opera in costruzione: la tecnica del 'brainstorming' condiviso aiuta a integrare le aree emotive e razionali, favorendo decisioni più consapevoli.",
+                    confidenza: "Alto"
+                },
+                {
+                    tema: "Autonomia e regole",
+                    consiglio: "Mantieni una presenza emotiva stabile anche quando il sedicenne sembra allontanarsi. Essere una 'base sicura' significa accettare la sua crescente indipendenza senza ritirarsi affettivamente, così che lui possa tornare a cercarti nei momenti di bisogno.",
+                    esperto: "John Bowlby",
+                    opera: "A Secure Base (1988)",
+                    concetto: "Bowlby afferma che l'attaccamento sicuro non si esaurisce nell'infanzia: durante l'adolescenza la figura di attaccamento funge da porto a cui tornare dopo le esplorazioni, garantendo la fiducia necessaria per separarsi gradualmente.",
+                    confidenza: "Alto"
+                },
+                {
+                    tema: "Autonomia e regole",
+                    consiglio: "Costruisci ponti tra i diversi ambienti di vita di tuo figlio: se a 16 anni il gruppo dei pari diventa centrale, cerca di conoscere gli amici e crea occasioni di incontro in casa. Una rete di microsistemi coerenti rafforza il senso di appartenenza e riduce i comportamenti a rischio.",
+                    esperto: "Urie Bronfenbrenner",
+                    opera: "The Ecology of Human Development (1979)",
+                    concetto: "Bronfenbrenner spiega che lo sviluppo è influenzato dall'interazione tra microsistemi (famiglia, scuola, gruppo dei pari). Quando questi mondi comunicano, l'adolescente vive maggiore coerenza e sicurezza.",
+                    confidenza: "Alto"
+                },
+
+                // COMUNICAZIONE (5)
+                {
+                    tema: "Comunicazione",
+                    consiglio: "Fai domande aperte e ascolta senza interrompere. A 16 anni i ragazzi stanno consolidando la propria identità e hanno bisogno di sentirsi presi sul serio. Sospendi il giudizio per qualche minuto: spesso si aprono se percepiscono che non darai subito una soluzione.",
+                    esperto: "Lisa Damour",
+                    opera: "Untangled (2016)",
+                    concetto: "Damour suggerisce che le ragazze (e i ragazzi) adolescenti raccontano di più quando i genitori pongono domande esplorative invece di interrogatori, legittimando le emozioni senza sminuirle.",
+                    confidenza: "Alto"
+                },
+                {
+                    tema: "Comunicazione",
+                    consiglio: "Rispecchia le emozioni di tuo figlio prima di offrire consigli. A 16 anni il cervello elabora le esperienze emotive in modo molto intenso; un semplice 'mi sembri arrabbiato, è successo qualcosa?' può disinnescare la chiusura comunicativa.",
+                    esperto: "Daniel Siegel",
+                    opera: "Brainstorm (2013)",
+                    concetto: "Siegel spiega che la sintonizzazione affettiva (sentire ciò che sente l'altro) attiva i circuiti di integrazione cerebrale, abbassando la reattività e favorendo il dialogo.",
+                    confidenza: "Alto"
+                },
+                {
+                    tema: "Comunicazione",
+                    consiglio: "Sfrutta i momenti informali (un tragitto in auto, cucinare insieme) per parlare di temi importanti. A 16 anni i discorsi lunghi e frontali attivano spesso la resistenza; meglio conversazioni brevi e frequenti, che rispettano la sua crescente autonomia.",
+                    esperto: "Laurence Steinberg",
+                    opera: "Age of Opportunity (2014)",
+                    concetto: "Steinberg raccomanda di sfruttare le attività condivise come occasione di dialogo, perché abbassano la percezione di controllo e fanno sentire il ragazzo più disponibile al confronto.",
+                    confidenza: "Alto"
+                },
+                {
+                    tema: "Comunicazione",
+                    consiglio: "Non ritirare l'affetto quando il dialogo si fa difficile. Anche se il sedicenne ti respinge apparentemente, la tua disponibilità emotiva costante rinforza l'attaccamento e gli permette di tornare a parlare quando è pronto.",
+                    esperto: "John Bowlby",
+                    opera: "A Secure Base (1988)",
+                    concetto: "Bowlby evidenzia che i pattern di comunicazione sicura si basano sulla prevedibilità della risposta genitoriale: sapere che il caregiver è accessibile emotivamente favorisce la confidenza.",
+                    confidenza: "Alto"
+                },
+                {
+                    tema: "Comunicazione",
+                    consiglio: "Cerca di connetterti prima di correggere. Se il sedicenne racconta un episodio in cui ha sbagliato, resisti all'impulso di fare la predica: la connessione emotiva è il prerequisito per qualsiasi influenza educativa, perché a questa età il gruppo dei pari rischia di diventare più influente dei genitori.",
+                    esperto: "Gabor Maté",
+                    opera: "Hold On to Your Kids (2004)",
+                    concetto: "Maté (con Neufeld) mette in guardia dal fenomeno dei pari che sostituiscono i genitori come riferimento primario: per mantenere l'attaccamento è essenziale dare priorità alla relazione rispetto al comportamento.",
+                    confidenza: "Alto"
+                },
+
+                // CONFLITTI SU ORARI/USCITE (5)
+                {
+                    tema: "Conflitti su orari/uscite",
+                    consiglio: "Negoziate un rientro flessibile legato all'attività specifica (cinema, festa, studio con amici) invece di imporre un orario fisso uguale per ogni occasione. A 16 anni il bisogno di socialità è neurologico; mostrare fiducia differenziata aiuta a sviluppare l'autoregolazione.",
+                    esperto: "Laurence Steinberg",
+                    opera: "Age of Opportunity (2014)",
+                    concetto: "Steinberg sottolinea che il sistema dopaminergico dell'adolescente risponde fortemente alla ricompensa sociale: proibire tout court può aumentare la tentazione, mentre accordi ragionati insegnano gradualmente l'autocontrollo.",
+                    confidenza: "Alto"
+                },
+                {
+                    tema: "Conflitti su orari/uscite",
+                    consiglio: "Distinguete insieme le uscite che favoriscono lo sviluppo sociale da quelle che presentano rischi concreti. A 16 anni le ragazze e i ragazzi hanno bisogno di sperimentare contesti diversi; concordate un piano di sicurezza (es. messaggio di buon arrivo) senza trasformarlo in un interrogatorio.",
+                    esperto: "Lisa Damour",
+                    opera: "Untangled (2016)",
+                    concetto: "Damour suggerisce di contrattare in base alla situazione, dando più libertà quando l'attività è strutturata e supervisionata, meno quando mancano informazioni.",
+                    confidenza: "Alto"
+                },
+                {
+                    tema: "Conflitti su orari/uscite",
+                    consiglio: "Offri alternative che soddisfino il bisogno di novità e brivido sociale in un ambiente protetto: organizza una festa a casa con supervisione discreta, oppure sostieni un'uscita di gruppo con adulti di riferimento. Così rispetti il bisogno di esplorazione del cervello adolescente.",
+                    esperto: "Daniel Siegel",
+                    opera: "Brainstorm (2013)",
+                    concetto: "Siegel descrive la ricerca di sensazioni come un tratto adattivo dell'adolescenza: incanalarla in contesti sicuri permette di vivere l'emozione senza mettere a repentaglio l'incolumità.",
+                    confidenza: "Alto"
+                },
+                {
+                    tema: "Conflitti su orari/uscite",
+                    consiglio: "Cerca di conoscere il contesto degli amici di tuo figlio senza essere invasivo. Invita i compagni a casa, offriti di accompagnarli: quando il microsistema dei pari diventa trasparente, i genitori possono dosare meglio limiti e libertà.",
+                    esperto: "Urie Bronfenbrenner",
+                    opera: "The Ecology of Human Development (1979)",
+                    concetto: "Bronfenbrenner afferma che la qualità dello sviluppo dipende dalla connessione tra i diversi ambienti di vita: famiglie che interagiscono con la rete amicale dei figli hanno maggiore efficacia educativa.",
+                    confidenza: "Alto"
+                },
+                {
+                    tema: "Conflitti su orari/uscite",
+                    consiglio: "Esprimi le tue preoccupazioni in termini di protezione, non di punizione. Un sedicenne che si sente compreso nelle sue ragioni è più disposto a negoziare l'orario di rientro, perché la relazione rimane il punto di riferimento affettivo primario.",
+                    esperto: "John Bowlby",
+                    opera: "A Secure Base (1988)",
+                    concetto: "Bowlby osserva che la minaccia di ritiro dell'amore o punizioni severe può minare la fiducia; al contrario, esprimere apprensione all'interno di una relazione sicura favorisce la cooperazione.",
+                    confidenza: "Alto"
+                },
+
+                // USO DI SMARTPHONE E SOCIAL (5)
+                {
+                    tema: "Uso di smartphone e social",
+                    consiglio: "Aiuta tuo figlio a decodificare i messaggi dei social, distinguendo la realtà dalla performance. A 16 anni la costruzione dell'identità passa anche attraverso l'immagine online: discutere insieme i post aiuta a sviluppare pensiero critico e a ridurre l'ansia da confronto.",
+                    esperto: "Lisa Damour",
+                    opera: "Untangled (2016)",
+                    concetto: "Damour spiega che le adolescenti spesso misurano il proprio valore attraverso i like; insegnare a riconoscere la natura costruita dei contenuti social è un'abilità protettiva fondamentale.",
+                    confidenza: "Alto"
+                },
+                {
+                    tema: "Uso di smartphone e social",
+                    consiglio: "Crea insieme un piano di utilizzo dello smartphone invece di proibire. A 16 anni l'autoregolazione è ancora in sviluppo: stabilite fasce orarie (es. no telefono dopo le 22) e coinvolgilo nel monitoraggio, trasformandolo in un'occasione di responsabilizzazione.",
+                    esperto: "Laurence Steinberg",
+                    opera: "Age of Opportunity (2014)",
+                    concetto: "Steinberg ricorda che il controllo esterno eccessivo non allena l'autocontrollo; meglio costruire progressivamente la capacità di gestire le distrazioni.",
+                    confidenza: "Alto"
+                },
+                {
+                    tema: "Uso di smartphone e social",
+                    consiglio: "Insegna a riconoscere i meccanismi di dipendenza dei social (notifiche, scrolling infinito) parlando apertamente di come il cervello reagisce alla ricompensa sociale. Un sedicenne che capisce il 'trucco' neurologico è più motivato a gestire attivamente il proprio tempo online.",
+                    esperto: "Daniel Siegel",
+                    opera: "Brainstorm (2013)",
+                    concetto: "Siegel spiega che il cervello adolescente è ipersensibile alle ricompense sociali; rendere consapevoli i ragazzi di questo meccanismo li aiuta a non subirlo passivamente.",
+                    confidenza: "Alto"
+                },
+                {
+                    tema: "Uso di smartphone e social",
+                    consiglio: "Se noti che tuo figlio si rifugia nello smartphone appena torna a casa, chiediti se manca una connessione reale. La tecnologia spesso colma un vuoto di attaccamento: rinforzare i momenti di condivisione familiare riduce il bisogno di fuga digitale.",
+                    esperto: "Gabor Maté",
+                    opera: "Hold On to Your Kids (2004)",
+                    concetto: "Maté avverte che quando il legame genitore-figlio si indebolisce, i ragazzi cercano altrove (compresi i dispositivi) il senso di appartenenza che dovrebbero trovare in famiglia.",
+                    confidenza: "Alto"
+                },
+                {
+                    tema: "Uso di smartphone e social",
+                    consiglio: "Entra nel mondo digitale di tuo figlio senza spiarlo: chiedigli di mostrarti un'app che gli piace, giocate insieme a un videogioco. Conoscere il suo ecosistema digitale come un nuovo microsistema ti permette di dare regole più sensate e condivise.",
+                    esperto: "Urie Bronfenbrenner",
+                    opera: "The Ecology of Human Development (1979)",
+                    concetto: "Bronfenbrenner direbbe che l'ambiente digitale è ormai un microsistema influente; i genitori che lo esplorano insieme ai figli mantengono un ruolo di guida anziché diventare estranei.",
+                    confidenza: "Alto"
+                },
+
+                // RELAZIONI SENTIMENTALI (5)
+                {
+                    tema: "Relazioni sentimentali",
+                    consiglio: "Parla di relazioni sentimentali prima che inizino, usando film o storie come spunto. A 16 anni le prime cotte sono intense e idealizzate; aiutare a riconoscere gli ingredienti di una relazione sana (rispetto, consenso, ascolto) costruisce aspettative realistiche.",
+                    esperto: "Lisa Damour",
+                    opera: "Untangled (2016)",
+                    concetto: "Damour sottolinea che le adolescenti spesso confondono l'intensità con l'amore; guidare conversazioni sul rispetto reciproco aiuta a distinguere relazioni nutrienti da quelle tossiche.",
+                    confidenza: "Alto"
+                },
+                {
+                    tema: "Relazioni sentimentali",
+                    consiglio: "Discuti apertamente di consenso e confini. Il cervello di un sedicenne, inondato da ormoni e dopamina, può trascurare i segnali dell'altro: parlare di comunicazione esplicita del sì e del no è un'educazione affettiva indispensabile.",
+                    esperto: "Daniel Siegel",
+                    opera: "Brainstorm (2013)",
+                    concetto: "Siegel spiega che l'integrazione tra circuito emotivo e corteccia prefrontale è ancora in corso; per questo i ragazzi hanno bisogno di una guida esplicita sulle dinamiche di coppia.",
+                    confidenza: "Alto"
+                },
+                {
+                    tema: "Relazioni sentimentali",
+                    consiglio: "Le prime relazioni sentimentali sono influenzate dal modello di attaccamento vissuto in famiglia. Se mostri ascolto e rispetto, tuo figlio imparerà a cercare partner che offrono lo stesso trattamento, riconoscendo l'amore come base sicura anziché come dipendenza.",
+                    esperto: "John Bowlby",
+                    opera: "A Secure Base (1988)",
+                    concetto: "Bowlby afferma che i modelli operativi interni, costruiti nell'infanzia, guidano le aspettative nelle relazioni intime: un attaccamento sicuro predispone a legami affettivi più equilibrati.",
+                    confidenza: "Alto"
+                },
+                {
+                    tema: "Relazioni sentimentali",
+                    consiglio: "Rispetta la privacy ma offriti come consulente. A 16 anni i ragazzi hanno bisogno di sperimentare l'intimità senza sentirsi controllati; fai sapere che possono parlare con te di dubbi o delusioni senza essere giudicati, pronti a intervenire solo se noti segnali di relazione malsana.",
+                    esperto: "Laurence Steinberg",
+                    opera: "Age of Opportunity (2014)",
+                    concetto: "Steinberg raccomanda di trovare un equilibrio tra supervisione e autonomia, fornendo strumenti per riconoscere i rapporti manipolativi senza vietare l'esperienza.",
+                    confidenza: "Alto"
+                },
+                {
+                    tema: "Relazioni sentimentali",
+                    consiglio: "Aiuta tuo figlio a capire che le relazioni a 16 anni sono un terreno di prova per l'identità personale. Secondo la teoria psicosociale, l'adolescenza è dominata dalla ricerca dell'identità; solo quando il ragazzo ha un'idea più chiara di sé può costruire intimità autentiche. Accompagnalo in questa esplorazione senza deridere le sue 'cotte'.",
+                    esperto: "Erik Erikson",
+                    opera: "Identity: Youth and Crisis (1968)",
+                    concetto: "Erikson ha descritto l'adolescenza come la fase 'identità vs. confusione di ruolo': le relazioni sentimentali precoci sono spesso tentativi di definirsi attraverso lo sguardo dell'altro. Il concetto di intimità piena appartiene allo stadio successivo, ma a 16 anni iniziano le prime sperimentazioni.",
+                    confidenza: "Basso"
+                },
+
+                // MOTIVAZIONE SCOLASTICA (5)
+                {
+                    tema: "Motivazione scolastica",
+                    consiglio: "Collega lo studio agli interessi personali e agli obiettivi futuri. A 16 anni il pensiero astratto permette di proiettarsi nel domani: chiedi a tuo figlio come immagina la sua vita tra cinque anni e aiuta a tracciare un percorso in cui le materie scolastiche hanno un senso concreto.",
+                    esperto: "Laurence Steinberg",
+                    opera: "Age of Opportunity (2014)",
+                    concetto: "Steinberg sottolinea che la capacità di pensare al futuro si sviluppa progressivamente; i genitori possono accelerare la motivazione mostrando connessioni tra ciò che si studia e le passioni del ragazzo.",
+                    confidenza: "Alto"
+                },
+                {
+                    tema: "Motivazione scolastica",
+                    consiglio: "Stimola il pensiero ipotetico e la discussione: invece di chiedere solo 'com'è andata la verifica?', proponi dilemmi o domande aperte legate agli argomenti scolastici. A 16 anni il ragionamento formale è ormai simile a quello adulto e si nutre di confronto intellettuale.",
+                    esperto: "Jean Piaget",
+                    opera: "The Growth of Logical Thinking from Childhood to Adolescence (1958)",
+                    concetto: "Piaget (con Inhelder) ha mostrato che a questa età i ragazzi padroneggiano il pensiero ipotetico-deduttivo: amano discutere di possibilità e scenari alternativi, il che può essere sfruttato per ravvivare l'interesse per lo studio.",
+                    confidenza: "Alto"
+                },
+                {
+                    tema: "Motivazione scolastica",
+                    consiglio: "Aiuta a gestire l'ansia da prestazione. La pressione in vista della maturità e dei test può bloccare anche studenti brillanti. Insegna tecniche di respirazione e pianificazione, e sottolinea che un voto non definisce il suo valore come persona.",
+                    esperto: "Lisa Damour",
+                    opera: "Untangled (2016)",
+                    concetto: "Damour descrive come le ragazze, in particolare, tendano a legare l'autostima al rendimento scolastico; smontare questa equazione riduce lo stress e paradossalmente migliora i risultati.",
+                    confidenza: "Alto"
+                },
+                {
+                    tema: "Motivazione scolastica",
+                    consiglio: "Rispetta il bisogno di pause e di sonno. Il cervello adolescente ha un ritmo sonno-veglia spostato in avanti e necessita di 8-9 ore di riposo. Un piano di studio che include tempo libero e sport non è pigrizia, ma igiene mentale che favorisce l'apprendimento.",
+                    esperto: "Daniel Siegel",
+                    opera: "Brainstorm (2013)",
+                    concetto: "Siegel insiste sull'importanza del sonno per il consolidamento della memoria e per l'equilibrio emotivo, aspetti cruciali per mantenere la motivazione scolastica.",
+                    confidenza: "Alto"
+                },
+                {
+                    tema: "Motivazione scolastica",
+                    consiglio: "Collabora con gli insegnanti senza trasformarti in un 'controllore'. Chiedi a tuo figlio di raccontarti un progetto scolastico che lo appassiona, e contatta il docente per capire come sostenerlo. Quando il microsistema scuola e la famiglia comunicano, l'adolescente percepisce coerenza e supporto.",
+                    esperto: "Urie Bronfenbrenner",
+                    opera: "The Ecology of Human Development (1979)",
+                    concetto: "Bronfenbrenner ha dimostrato che il raccordo tra famiglia e scuola è uno dei fattori più potenti per il successo formativo, perché crea un ambiente di sviluppo stabile.",
+                    confidenza: "Alto"
+                },
+
+                // GESTIONE DELLE EMOZIONI (5)
+                {
+                    tema: "Gestione delle emozioni",
+                    consiglio: "Insegna a riconoscere e nominare le emozioni. A 16 anni le tempeste ormonali amplificano i vissuti; avere un vocabolario emotivo (rabbia, delusione, vergogna, euforia) aiuta il ragazzo a prendere distanza dall'impulso e a scegliere come reagire.",
+                    esperto: "Daniel Siegel",
+                    opera: "Brainstorm (2013)",
+                    concetto: "Siegel parla di 'name it to tame it': dare un nome all'emozione attiva la corteccia prefrontale e riduce l'attivazione dell'amigdala, favorendo l'autoregolazione.",
+                    confidenza: "Alto"
+                },
+                {
+                    tema: "Gestione delle emozioni",
+                    consiglio: "Accogli le emozioni senza sminuirle. Quando tua figlia sedicenne piange per un'amicizia finita, evita frasi come 'non è niente': per lei è tutto. Convalidare il suo dolore ('Capisco che stai soffrendo') le insegna che le emozioni si possono attraversare, non reprimere.",
+                    esperto: "Lisa Damour",
+                    opera: "Untangled (2016)",
+                    concetto: "Damour afferma che le adolescenti hanno bisogno di sentire che le loro emozioni sono accettate; solo così imparano a regolarle senza vergognarsene.",
+                    confidenza: "Alto"
+                },
+                {
+                    tema: "Gestione delle emozioni",
+                    consiglio: "Offriti come base sicura anche nei momenti di crisi. Se tuo figlio esplode in una sfuriata, mantieni la calma senza punire immediatamente: spesso l'esplosione è una richiesta di aiuto mascherata. Dopo la calma, potrete riflettere insieme su quanto è accaduto.",
+                    esperto: "John Bowlby",
+                    opera: "A Secure Base (1988)",
+                    concetto: "Bowlby spiega che la regolazione emotiva si apprende all'interno di una relazione di attaccamento in cui il genitore funge da contenitore sicuro per le emozioni intense.",
+                    confidenza: "Alto"
+                },
+                {
+                    tema: "Gestione delle emozioni",
+                    consiglio: "Non prendere sul personale gli sbalzi d'umore. A 16 anni il cervello è in piena ristrutturazione e reagisce in modo esagerato a stimoli che gli adulti considerano banali. Rispondi con empatia ma senza assorbire il turbamento: la tua stabilità emotiva è un modello.",
+                    esperto: "Laurence Steinberg",
+                    opera: "Age of Opportunity (2014)",
+                    concetto: "Steinberg ricorda che lo sviluppo emotivo è irregolare; la maturità nella gestione delle emozioni arriva gradualmente, e i genitori fungono da regolatori esterni finché l'autoregolazione non è completa.",
+                    confidenza: "Alto"
+                },
+                {
+                    tema: "Gestione delle emozioni",
+                    consiglio: "Esplora con tuo figlio l'origine delle emozioni difficili, magari collegandole a esperienze passate. Spesso i sedicenni esprimono rabbia o tristezza che affondano radici in bisogni di attaccamento trascurati; mostrare curiosità invece che giudizio aiuta a dissolvere il blocco emotivo.",
+                    esperto: "Gabor Maté",
+                    opera: "Hold On to Your Kids (2004)",
+                    concetto: "Maté sostiene che le emozioni represse nell'infanzia riemergono nell'adolescenza; il compito del genitore è riconoscerle e offrire una presenza compassionevole che facilita l'elaborazione.",
+                    confidenza: "Alto"
+                },
+
+                // GRUPPO DEI PARI (5)
+                {
+                    tema: "Gruppo dei pari",
+                    consiglio: "Non proibire le amicizze che non ti piacciono, ma discuti le influenze. A 16 anni l'approvazione del gruppo è un bisogno neurologico potente; invece di attaccare gli amici, chiedi a tuo figlio cosa apprezza di loro e stimolalo a riflettere su eventuali dinamiche negative.",
+                    esperto: "Laurence Steinberg",
+                    opera: "Age of Opportunity (2014)",
+                    concetto: "Steinberg mostra che la suscettibilità all'influenza dei pari raggiunge il picco intorno ai 14-16 anni; il dialogo critico è più efficace del divieto, che rischia di rendere quelle amicizie ancora più attraenti.",
+                    confidenza: "Alto"
+                },
+                {
+                    tema: "Gruppo dei pari",
+                    consiglio: "Aiuta tua figlia a distinguere amicizie autentiche da quelle tossiche. Poni domande come 'Come ti senti dopo aver passato del tempo con lei?'. A 16 anni le dinamiche relazionali possono diventare manipolative; sviluppare la capacità di leggere le proprie emozioni è un'abilità sociale preziosa.",
+                    esperto: "Lisa Damour",
+                    opera: "Untangled (2016)",
+                    concetto: "Damour descrive le amicizie conflittuali tipiche dell'adolescenza e suggerisce di allenare le ragazze a riconoscere i segnali di una relazione squilibrata.",
+                    confidenza: "Alto"
+                },
+                {
+                    tema: "Gruppo dei pari",
+                    consiglio: "Incoraggia la partecipazione a gruppi con valori positivi (sport, volontariato, musica). A 16 anni il senso di appartenenza è essenziale per l'identità; offrire contesti strutturati soddisfa il bisogno di socialità in modo protetto e aiuta a costruire autostima.",
+                    esperto: "Daniel Siegel",
+                    opera: "Brainstorm (2013)",
+                    concetto: "Siegel sottolinea che l'appartenenza a gruppi prosociali contrasta il rischio di isolamento e fornisce un palcoscenico sano per l'esplorazione dell'identità.",
+                    confidenza: "Alto"
+                },
+                {
+                    tema: "Gruppo dei pari",
+                    consiglio: "Crea ponti tra il tuo mondo e quello degli amici di tuo figlio. Invita i compagni a cena, organizzate un'uscita insieme. Quando il gruppo dei pari non è una fortezza separata dalla famiglia, si riducono i comportamenti oppositivi e aumenta la trasparenza.",
+                    esperto: "Urie Bronfenbrenner",
+                    opera: "The Ecology of Human Development (1979)",
+                    concetto: "Bronfenbrenner dimostra che l'interconnessione tra microsistemi (famiglia e gruppo amicale) è un fattore protettivo, perché l'adolescente vive meno conflitti di lealtà.",
+                    confidenza: "Alto"
+                },
+                {
+                    tema: "Gruppo dei pari",
+                    consiglio: "Rafforza il legame genitore-figlio in modo che il gruppo dei pari non diventi l'unico riferimento. Trascorri tempo di qualità individuale con tuo figlio facendo qualcosa che piace a lui: quando l'attaccamento è solido, l'influenza dei coetanei resta importante ma non esclusiva.",
+                    esperto: "Gabor Maté",
+                    opera: "Hold On to Your Kids (2004)",
+                    concetto: "Maté (con Neufeld) spiega che il problema non è il gruppo in sé, ma il vuoto di attaccamento che spinge i ragazzi a cercare nei pari ciò che dovrebbero trovare nei genitori.",
+                    confidenza: "Alto"
+                }
+            ];
+
+            // Riferimenti al DOM
+            const temaSelect = document.getElementById('temaSelect');
+            const generateBtn = document.getElementById('generateBtn');
+            const cardContainer = document.getElementById('cardContainer');
+            const cardTema = document.getElementById('cardTema');
+            const cardTitolo = document.getElementById('cardTitolo');
+            const cardConsiglio = document.getElementById('cardConsiglio');
+            const refEsperto = document.getElementById('refEsperto');
+            const refOpera = document.getElementById('refOpera');
+            const refConcetto = document.getElementById('refConcetto');
+            const refConfidenza = document.getElementById('refConfidenza');
+            const verifyBtn = document.getElementById('verifyBtn');
+            const sessionCounterSpan = document.getElementById('sessionCounter');
+
+            // Stato della sessione
+            let sessionCount = 0;
+            let schedaCorrente = null; // memorizza i dati della scheda visualizzata
+
+            // Funzione per mescolare array (Fisher-Yates)
+            function shuffle(array) {
+                const arr = [...array];
+                for (let i = arr.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [arr[i], arr[j]] = [arr[j], arr[i]];
+                }
+                return arr;
+            }
+
+            // Cache delle schede mescolate per tema, per estrarre senza ripetizioni ravvicinate
+            const shuffledCache = {};
+
+            function getRandomSchedaByTema(tema) {
+                if (!shuffledCache[tema] || shuffledCache[tema].length === 0) {
+                    const filtered = schedeDB.filter(s => s.tema === tema);
+                    if (filtered.length === 0) return null;
+                    shuffledCache[tema] = shuffle(filtered);
+                }
+                return shuffledCache[tema].pop();
+            }
+
+            function aggiornaInterfaccia(scheda) {
+                if (!scheda) return;
+                schedaCorrente = scheda;
+                cardTema.textContent = scheda.tema;
+                cardTitolo.textContent = 'Consiglio pratico';
+                cardConsiglio.textContent = scheda.consiglio;
+                refEsperto.textContent = scheda.esperto;
+                refOpera.textContent = scheda.opera;
+                refConcetto.textContent = `"${scheda.concetto}"`;
+                refConfidenza.textContent = `Livello confidenza: ${scheda.confidenza}`;
+                refConfidenza.className = 'confidenza ' + scheda.confidenza.toLowerCase();
+
+                // Mostra la card con animazione
+                cardContainer.classList.add('visible');
+
+                // Aggiorna il pulsante verifica
+                const query = encodeURIComponent(scheda.esperto + ' ' + scheda.opera.split('(')[0].trim());
+                verifyBtn.onclick = function() {
+                    window.open('https://www.google.com/search?q=' + query, '_blank', 'noopener');
+                };
+            }
+
+            function generaScheda() {
+                const temaSelezionato = temaSelect.value;
+                if (!temaSelezionato) {
+                    alert('Seleziona un tema dal menu a tendina prima di generare un consiglio.');
+                    return;
+                }
+
+                const scheda = getRandomSchedaByTema(temaSelezionato);
+                if (!scheda) {
+                    alert('Nessuna scheda disponibile per questo tema. Riprova più tardi.');
+                    return;
+                }
+
+                sessionCount++;
+                sessionCounterSpan.textContent = sessionCount;
+                aggiornaInterfaccia(scheda);
+            }
+
+            // Event listener
+            generateBtn.addEventListener('click', generaScheda);
+
+            // Inizializza contatore
+            sessionCounterSpan.textContent = '0';
+
+            // Gestione reinizializzazione cache se l'utente cambia tema (non è necessario, ma puliamo)
+            temaSelect.addEventListener('change', function() {
+                // Non resettiamo la cache, perché vogliamo varietà nel tempo per lo stesso tema
+            });
+
+            // Per evitare confusione, all'avvio la card è nascosta
+            cardContainer.classList.remove('visible');
+        })();
+    </script>
+</body>
+</html>
